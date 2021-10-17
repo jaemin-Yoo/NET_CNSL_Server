@@ -1,9 +1,11 @@
 # Project: NET_CNSL_Server
 * 스쿨존 CCTV를 활용한 스마트 내비게이션
 * NET 챌린지 캠프 시즌7 챌린지리그
-* 주최 :
-* 주관 :
+* 주최 : 과학기술정보통신부
+* 주관 : KOREN연구협력포럼, 한국지능정보사회진흥원
 * 2020.05 ~ 2020.12
+
+<img src="/doc/imgs/ppt1.png" width="100%">
 
 ## 0. Overview
 스쿨존에서의 어린이 사고는 매해 끊임없이 발생하고 있다.
@@ -15,10 +17,34 @@
 - 운전자가 볼 수 없는 사각지대에서 어린이가 갑자기 튀어나오는 갑작스러운 상황에 사고를 예방할 수 있다.
 
 ## 2. Function
-- hog 알고리즘을 사용한 보행자 검출
-- perspective 함수를 사용하여 3D 좌표를 2D좌표로 매핑
-- 픽셀 좌표를 GPS 좌표로 변환
-- 다중 CCTV를 활용한 사각지대 문제 해결 및 정확도 개선
+- hog 알고리즘을 사용한 보행자 검출</br></br>
+<img src="/doc/imgs/ppt3.png" width="70%"></br>
+CCTV에서 사람을 인식하기 위해서 픽셀의 그래디언트 방향 성분을 히스토그램으로 객체의 상태를 추출 분류하고,  특징 벡터를 추출하여 보행자를 분류하는 방식인 hog알고리즘을 이용해서 보행자를 검출 하였다.
+</br></br></br>
+- perspective 함수를 사용하여 3D 좌표를 2D좌표로 매핑</br></br>
+<img src="/doc/imgs/ppt4.png" width="50%"></br>
+인식된 사람의 좌표를 GPS좌표로 변환하기 위한 구역을 설정하여 2D좌표로 매핑한다.
+</br></br></br>
+- 픽셀 좌표를 GPS 좌표로 변환</br></br>
+<img src="/doc/imgs/ppt5.png" width="50%"></br>
+perspective를 한 이미지에서 인식된 사람의 발끝좌표를 추출한다.
+픽셀과 지도상의 가로 세로 간 거리 비를 먼저 구한 뒤 그 비를 이용하여 지도 상의 원점과 점 H의 거리를 구하는 식과 두 점을 지나는 직선의 방정식을 연립하여 점 H를 구한다.</br></br>
+<img src="/doc/imgs/ppt6.png" width="50%"></br>
+이후 P점과 H점의 거리 식, 원점과 H를 지나는 직선의 방정식과 수직인 방정식 즉, 점 P와 H를 지나는 직선의 방정식을 연립하여 원하는 좌표 P인 인식된 사람의 GPS좌표를 구할 수 있다.</br></br>
+<img src="/doc/imgs/ppt7.png" width="50%"></br>
+실제 GPS값과 계산하여 구한 GPS값을 비교하여 보니, 1~2m 정도의 오차가 생기는 것을 확인할 수 있다.
+</br></br></br>
+- 다중 CCTV를 활용한 사각지대 문제 해결 및 정확도 개선</br></br>
+<img src="/doc/imgs/ppt8.png" width="50%"></br>
+그림에서 두 개의 cctv를 활용하여 각 cctv에서 인식된 사람의 좌표들을 추출하면 두 명의 사람을 네 개의 좌표로 나타내는 문제가 발생했다.
+그렇기 때문에, 서로 다른 cctv에서 추출된 좌표들을 서로 비교해서 같은 사람인지 다른 사람인지 판별하게 된다.
+일정 거리 내에 위치하는 경우 같은 사람으로 판별하여 두 좌표의 평균으로 좌표들을 합병하게 된다.</br></br>
+<img src="/doc/imgs/ppt9.png" width="50%"></br>
+각 cctv에서 두 명의 사람을 인식한 경우 두 개의 좌표만 나타낼 수 있고 그림에서 볼 수 있듯이,
+1번 cctv가 인식하지 못한 사람을 2번 cctv에서 인식 함으로써, 사각지대 문제를 해결 할 수 있다.
+또한, 같은 사람으로 인식한 두 좌표의 평균을 구함으로써 좀 더 정확도가 향상 시킬 수 있다.</br></br>
+<img src="/doc/imgs/ppt10.png" width="50%"></br>
+실제 사람의 GPS와 다중 cctv를 활용하여 정확도를 개선한 GPS의 오차를 비교해본 결과, 오차가 1m 이상 감소된 것을 확인 할 수 있다.
 
 ### SDI Server
 - HPC서버에서 전송한 GPS좌표 데이터를 저장하고 관리한다.
@@ -31,11 +57,14 @@
 - CCTV에서 수신한 보행자 GPS데이터를 KOREN망을 통해 실시간으로 처리하므로 스쿨존 내 교통 상황을 신속하게 확인할 수 있다.
 
 ## 3. Flow
-<img src="/doc/imgs/img1.png" width="50%">  
-<img src="/doc/imgs/img2.png" width="50%">
+<img src="/doc/imgs/img1.png" width="50%"> <img src="/doc/imgs/img2.png" width="50%">  
+<img src="/doc/imgs/ppt2.png" width="70%">
+
 
 ## 4. UI
 |앱|서버|CCTV|
 |---|---|---|
 |- 실시간으로 서버에 단말기의 위치정보를 전송하여 어린이 보호구역에 위치하는지 파악한다.</br></br>- SDI서버에서 수신받은 보행자 위치정보를 빨간 마커의 형태로 표시한다.</br></br>- 차량에 인접한 거리에 있는 보행자는 마커의 색깔이 진하게 표시되거나 경고알림 등으로 위험정도를 알린다.|**HPC**</br>- SDI, CCTV와 소켓 통신이 가능하다.</br>- 다중 CCTV에서 수신 받은 위치 정보를 이용하여 사람 위치 오차를 최소화하고 사각지대 문제를 해결한다.</br></br>**SDI**</br>- HPC와 소켓 통신 및 앱과 Http통신이 가능하다.</br>- 보행자의 위치정보를 데이터베이스에 저장한다.</br>- 저장된 정보를 앱에 전송하여 보행자의 위치를 표시한다.|- 사람을 인식하고 2D 좌표를 이용하여 지도상의 보행자 위치 좌표를 추출한다.</br></br>- 추출한 좌표를 HPC에 전달한다.|
 |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/doc/imgs/result01.png" width="50%">|<img src="/doc/imgs/result02.png" width="100%">|<img src="/doc/imgs/result03.png" width="100%">|
+
+<img src="/doc/imgs/ppt11.png" width="100%">
